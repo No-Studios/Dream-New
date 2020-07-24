@@ -7,6 +7,9 @@ using UnityEngine.Tilemaps;
 
 public class TileGroup : MonoBehaviour
 {
+
+    Canvas ca = new Canvas(); 
+    
     [SerializeField]
     public TileBase tile_to_place = null;
     public GameObject temp_tile_to_place;
@@ -21,26 +24,84 @@ public class TileGroup : MonoBehaviour
     private SerializedTile base_tile;
     public float xOffset = .8f;
 
-    public List<GameObject> child_tiles; 
+    public bool moving_to_position = false;
+    private Vector3 current_position_move_to; 
+
+    public List<GameObject> child_tiles;
+    public bool goto_next_spawn = false;
+
+    public GameManager gm;
+    public int current_spawn_index = 0;
+    public int move_index = 0;
+    public float next_move_wait;
+    public float next_move_wait_max = 2f;
+    public bool next_move_ready = true;
+    private bool start_next_timer = false; 
+
+
     // Start is called before the first frame update
     void Start()
     {
-        child_tiles = new List<GameObject>(); 
+        
+    }
+
+    private void Awake()
+    {
+        gm = GameObject.FindGameObjectWithTag("Game Manager").GetComponent<GameManager>();
+        child_tiles = new List<GameObject>();
         all_tiles = new List<SerializedTile>();
         base_tile = new SerializedTile();
         all_tiles.Add(base_tile);
-    }
+        next_move_wait = next_move_wait_max;
+        next_move_ready = true;
 
-    // Update is called once per frame
-    void Update()
+}
+// Update is called once per frame
+void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+
+        if (start_next_timer)
         {
+            if(next_move_wait <= 0)
+            {
+                next_move_ready = true;
+                start_next_timer = false;
+                next_move_wait = next_move_wait_max;
+            }
+            else
+            {
+                next_move_wait -= Time.deltaTime;
+            }
+        }
 
-            CreateTileGroup(group_length);
-            this.transform.localScale = new Vector3(.5f, .5f, .5f);
+        if (moving_to_position && next_move_ready)
+        {
+            this.transform.position = Vector3.MoveTowards(this.transform.position, current_position_move_to, 2f * Time.deltaTime);
+        }
 
+        if (goto_next_spawn)
+        {
+            Debug.Log("yyyyyy");
+            next_move_ready = false;
+            current_spawn_index++;
+            move_index++;
 
+            if (move_index >= gm.spots_to_move_to.Length)
+            {
+                move_index = 0;
+            }
+
+            if (current_spawn_index >= gm.spawns.Length)
+            {
+                Destroy(this);
+                current_spawn_index = 0;
+            }
+            Debug.Log("current: " + gm.spawns.Length);
+            this.transform.position = gm.spawns[current_spawn_index].position;
+            MoveToPosition(gm.spots_to_move_to[move_index].position);
+            goto_next_spawn = false;
+            next_move_wait = next_move_wait_max;
+            start_next_timer = true; 
         }
     }
 
@@ -68,6 +129,7 @@ public class TileGroup : MonoBehaviour
 
             GameObject g = Instantiate(temp_tile_to_place);
             g.AddComponent(typeof(FakeTile));
+            //g.AddComponent(typeof(BoxCollider2D));
             g.GetComponent<FakeTile>().x = s.x;
             g.GetComponent<FakeTile>().y = s.y;
             float xPos = 0;
@@ -100,6 +162,12 @@ public class TileGroup : MonoBehaviour
         
         
         
+    }
+
+    public void MoveToPosition(Vector3 pos_to_move_to)
+    {
+        current_position_move_to = pos_to_move_to;
+        moving_to_position = true; 
     }
 
     public class SerializedTile
@@ -255,4 +323,8 @@ public class TileGroup : MonoBehaviour
         int randIndex = Random.Range(0, all_tiles.Count);
         return all_tiles[randIndex];
     }
+
+
+
+    
 }

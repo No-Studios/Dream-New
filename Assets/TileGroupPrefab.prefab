@@ -25,7 +25,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5714902569389560601}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 26.647167, y: -2.0093179, z: -3.1969688}
+  m_LocalPosition: {x: 501.64716, y: -2.0093179, z: -3.1969688}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -50,4 +50,12 @@ MonoBehaviour:
   tile_length: 1
   tile_height: 1
   xOffset: 0.51
+  moving_to_position: 0
   child_tiles: []
+  goto_next_spawn: 0
+  gm: {fileID: 3201932765606372498, guid: d15407849bdb40c42856ddb32a033938, type: 3}
+  current_spawn_index: 0
+  move_index: 0
+  next_move_wait: 0
+  next_move_wait_max: 0.5
+  next_move_ready: 0
